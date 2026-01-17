@@ -124,13 +124,6 @@ export default function CameraGrid({
                   {camera.location}
                 </p>
               </div>
-              {hasApiAlert && (
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                  <span className="text-white font-semibold text-sm">
-                    Go to alert
-                  </span>
-                </div>
-              )}
             </div>
           );
         })}
