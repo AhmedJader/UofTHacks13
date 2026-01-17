@@ -1,8 +1,9 @@
+import AnalyticsDashboard from "@/components/analytics/analytics-dashboard";
+
 export default function AnalyticsPage() {
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold">Analytics</h1>
-      <p className="mt-2 text-muted-foreground">You are signed in.</p>
+    <main className="min-h-screen bg-slate-950 p-8">
+      <AnalyticsDashboard />
     </main>
   );
 }
