@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { Alert } from "@/types/types";
+import { Button } from "@/components/ui/button";
+
 
 const DUMMY_CAMERAS = [
-  { id: "cam-1", name: "Entrance", location: "Front Door" },
-  { id: "cam-2", name: "Lobby", location: "Main Lobby" },
-  { id: "cam-3", name: "Parking Lot A", location: "North Lot" },
-  { id: "cam-4", name: "Parking Lot B", location: "South Lot" },
-  { id: "cam-5", name: "Back Alley", location: "Rear Exit" },
-  { id: "cam-6", name: "Office Floor", location: "2nd Floor" },
+  { id: "cam-1", name: "Downtown", location: "City Center", src: "/cctv/downtown.mp4" },
+  { id: "cam-2", name: "Incident 1", location: "Sector 4", src: "/cctv/incident1.mp4" },
+  { id: "cam-3", name: "Incident 2", location: "Sector 7", src: "/cctv/incident2.mp4" },
+  { id: "cam-4", name: "Incident 3", location: "Sector 9", src: "/cctv/incident3.mp4" },
+  { id: "cam-5", name: "TTC Station", location: "Subway Platform", src: "/cctv/ttc1.mp4" },
 ];
 
 interface CameraAnalysisResponse {
@@ -96,22 +97,27 @@ export default function CameraGrid({
             <div
               key={camera.id}
               onClick={() => onCameraClick(camera.id)}
-              className={`group relative rounded-lg overflow-hidden cursor-pointer transition-all ${
-                camera.id === selectedCameraId
-                  ? "ring-2 ring-blue-500"
-                  : "ring-1 ring-slate-700 hover:ring-slate-400"
-              } ${hasApiAlert ? "bg-slate-800" : "bg-slate-900 opacity-50"}`}
+              className={`group relative rounded-lg overflow-hidden cursor-pointer transition-all ${camera.id === selectedCameraId
+                ? "ring-2 ring-blue-500"
+                : "ring-1 ring-slate-700 hover:ring-slate-400"
+                } ${hasApiAlert ? "bg-slate-800" : "bg-slate-900 opacity-50"}`}
             >
-              <div className="w-full aspect-video bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center relative">
-                <div className="absolute top-2 left-2 flex items-center gap-2">
+              <div className="w-full aspect-video bg-slate-950 relative group-hover:opacity-90 transition-opacity">
+                <video
+                  src={camera.src}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/50 px-2 py-1 rounded backdrop-blur-sm">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-red-500 font-mono">LIVE</span>
+                  <span className="text-xs text-red-500 font-mono font-bold">LIVE</span>
                 </div>
-                <span
-                  className={`text-sm ${hasApiAlert ? "text-slate-500" : "text-slate-600"}`}
-                >
-                  {camera.name}
-                </span>
+                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-xs text-white font-mono">{camera.name}</span>
+                </div>
               </div>
 
               <div className="p-3 bg-slate-900 border-t border-slate-700">
@@ -123,6 +129,33 @@ export default function CameraGrid({
                 >
                   {camera.location}
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 w-full text-xs"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    console.log("Analyzing camera:", camera.id);
+                    try {
+                      const res = await fetch("http://127.0.0.1:5000/analyze-video", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ cameraId: camera.id })
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        console.log("Analysis result:", data.result);
+                        onAddAlert(camera.id, camera.name);
+                      } else {
+                        console.error("Analysis failed:", data.error);
+                      }
+                    } catch (error) {
+                      console.error("Failed to call analysis API:", error);
+                    }
+                  }}
+                >
+                  Analyze Feed
+                </Button>
               </div>
             </div>
           );
