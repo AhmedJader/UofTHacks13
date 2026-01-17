@@ -1,6 +1,6 @@
 import { ProtectedLayout } from "@/app/components/protected-layout";
 
-export default async function DashboardLayout({
+export default async function UploadLayout({
   children,
 }: {
   children: React.ReactNode;
