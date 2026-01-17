@@ -17,16 +17,23 @@ export default function DashboardPage() {
     },
   ]);
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>("1");
+  const [selectedCameraFilter, setSelectedCameraFilter] = useState<
+    string | null
+  >(null);
   const [fullscreenCameraId, setFullscreenCameraId] = useState<string | null>(
     null,
   );
 
   const handleCameraClick = (cameraId: string) => {
-    const existingAlert = alerts.find((a) => a.cameraId === cameraId);
-    if (existingAlert) {
-      setSelectedAlertId(existingAlert.id);
-    }
+    // Toggle the filter: if the same camera is clicked, clear the filter
+    setSelectedCameraFilter((prev) => (prev === cameraId ? null : cameraId));
   };
+
+  // Filter alerts based on selected camera
+  const filteredAlerts =
+    selectedCameraFilter === null
+      ? alerts
+      : alerts.filter((a) => a.cameraId === selectedCameraFilter);
 
   const handleAddAlert = (cameraId: string, cameraName: string) => {
     const newAlert: Alert = {
@@ -94,20 +101,16 @@ export default function DashboardPage() {
       <div className="flex-1 flex overflow-hidden">
         <div className="w-3/4 border-r border-slate-700 overflow-auto">
           <CameraGrid
+            alerts={alerts}
             onCameraClick={handleCameraClick}
             onAddAlert={handleAddAlert}
-            selectedCameraId={
-              selectedAlertId
-                ? (alerts.find((a) => a.id === selectedAlertId)?.cameraId ??
-                  null)
-                : null
-            }
+            selectedCameraId={selectedCameraFilter}
           />
         </div>
 
         <div className="w-1/4 overflow-auto">
           <AlertPanel
-            alerts={alerts}
+            alerts={filteredAlerts}
             selectedAlertId={selectedAlertId}
             onSelectAlert={setSelectedAlertId}
             onFullscreen={handleFullscreenAlert}

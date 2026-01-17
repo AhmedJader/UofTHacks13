@@ -90,7 +90,7 @@ export default function AlertPanel({
           <div className="space-y-2 p-3">
             {alerts.map((alert) => (
               <button
-                key={alert.id}
+                key={`${alert.cameraName}_${alert.id}`}
                 onClick={() => onSelectAlert(alert.id)}
                 className={`w-full text-left p-3 rounded-lg border transition-all ${
                   selectedAlertId === alert.id

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Alert } from "@/types/types";
 
 const DUMMY_CAMERAS = [
   { id: "cam-1", name: "Entrance", location: "Front Door" },
@@ -12,93 +12,118 @@ const DUMMY_CAMERAS = [
   { id: "cam-6", name: "Office Floor", location: "2nd Floor" },
 ];
 
+interface CameraAnalysisResponse {
+  cameraId: string;
+  alert: boolean;
+}
+
 interface CameraGridProps {
+  alerts: Alert[];
   onCameraClick: (cameraId: string) => void;
   onAddAlert: (cameraId: string, cameraName: string) => void;
   selectedCameraId: string | null;
 }
 
 export default function CameraGrid({
+  alerts,
   onCameraClick,
   onAddAlert,
   selectedCameraId,
 }: CameraGridProps) {
-  const [activeCameras, setActiveCameras] = useState<Set<string>>(
+  const [selectedCamera, setSelectedCamera] = useState<Set<string>>(
     new Set(["cam-1"]),
   );
+  const [cameraAnalysis, setCameraAnalysis] = useState<
+    Record<string, CameraAnalysisResponse>
+  >({});
+  const [previousAnalysis, setPreviousAnalysis] = useState<
+    Record<string, CameraAnalysisResponse>
+  >({});
 
-  const toggleCamera = (cameraId: string) => {
-    const newSet = new Set(activeCameras);
-    if (newSet.has(cameraId)) {
-      newSet.delete(cameraId);
-    } else {
-      newSet.add(cameraId);
+  const fetchCameraAnalysis = async () => {
+    try {
+      // TODO: Replace this with actual TwelveLabs API call
+      // const response = await fetch('/api/analyze-cameras');
+      // const data = await response.json();
+      // setCameraAnalysis(data);
+
+      const fakeResponse: Record<string, CameraAnalysisResponse> = {};
+      DUMMY_CAMERAS.forEach((camera) => {
+        fakeResponse[camera.id] = {
+          cameraId: camera.id,
+          alert: Math.random() > 0.7,
+        };
+      });
+
+      fakeResponse &&
+        Object.entries(fakeResponse).forEach(([cameraId, analysis]) => {
+          const previousHadAlert = previousAnalysis[cameraId]?.alert || false;
+          const nowHasAlert = analysis.alert;
+
+          // If the camera just detected an alert (wasn't detecting before)
+          if (nowHasAlert && !previousHadAlert) {
+            const camera = DUMMY_CAMERAS.find((c) => c.id === cameraId);
+            if (camera) {
+              onAddAlert(camera.id, camera.name);
+            }
+          }
+        });
+
+      setPreviousAnalysis(fakeResponse);
+      setCameraAnalysis(fakeResponse);
+    } catch (error) {
+      console.error("Failed to fetch camera analysis:", error);
     }
-    setActiveCameras(newSet);
   };
+
+  useEffect(() => {
+    fetchCameraAnalysis();
+
+    const interval = setInterval(fetchCameraAnalysis, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="p-4 space-y-4">
       <div className="grid grid-cols-2 gap-4">
         {DUMMY_CAMERAS.map((camera) => {
-          const isActive = activeCameras.has(camera.id);
-          const isSelected = selectedCameraId === camera.id;
+          const hasApiAlert = cameraAnalysis[camera.id]?.alert || false;
+
+          console.log("Camera:", camera.id, "API Alert:", hasApiAlert);
 
           return (
             <div
               key={camera.id}
-              className={`relative rounded-lg overflow-hidden cursor-pointer transition-all transform ${
-                isSelected
-                  ? "ring-2 ring-blue-500 scale-105"
-                  : "ring-1 ring-slate-700"
-              } ${isActive ? "bg-slate-800 hover:ring-slate-600" : "bg-slate-900 opacity-50"}`}
-              onClick={() => {
-                toggleCamera(camera.id);
-                if (isActive) {
-                  onCameraClick(camera.id);
-                }
-              }}
+              onClick={() => onCameraClick(camera.id)}
+              className={`group relative rounded-lg overflow-hidden cursor-pointer transition-all ${
+                camera.id === selectedCameraId
+                  ? "ring-2 ring-blue-500"
+                  : "ring-1 ring-slate-700 hover:ring-slate-400"
+              } ${hasApiAlert ? "bg-slate-800" : "bg-slate-900 opacity-50"}`}
             >
               <div className="w-full aspect-video bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center relative">
-                {isActive && (
-                  <>
-                    <div className="absolute top-2 left-2 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-red-500 font-mono">
-                        LIVE
-                      </span>
-                    </div>
-                    <span className="text-slate-500 text-sm">
-                      {camera.name}
-                    </span>
-                  </>
-                )}
-                {!isActive && (
-                  <span className="text-slate-600 text-sm">Offline</span>
-                )}
+                <div className="absolute top-2 left-2 flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-red-500 font-mono">LIVE</span>
+                </div>
+                <span
+                  className={`text-sm ${hasApiAlert ? "text-slate-500" : "text-slate-600"}`}
+                >
+                  {camera.name}
+                </span>
               </div>
 
               <div className="p-3 bg-slate-900 border-t border-slate-700">
                 <h3 className="text-sm font-semibold text-white">
                   {camera.name}
                 </h3>
-                <p className="text-xs text-slate-400">{camera.location}</p>
+                <p
+                  className={`text-xs ${hasApiAlert ? "text-red-400" : "text-slate-400"}`}
+                >
+                  {camera.location}
+                </p>
               </div>
-
-              {isActive && (
-                <div className="p-2 bg-slate-800 border-t border-slate-700 flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddAlert(camera.id, camera.name);
-                    }}
-                    className="flex-1 flex items-center justify-center gap-1 bg-red-900/50 hover:bg-red-900 text-red-300 text-xs py-1 rounded px-2 transition-colors"
-                  >
-                    <AlertCircle size={14} />
-                    Alert
-                  </button>
-                </div>
-              )}
             </div>
           );
         })}
