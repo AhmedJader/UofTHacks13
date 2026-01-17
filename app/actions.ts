@@ -1,24 +1,15 @@
 'use server'
 
 import { auth } from '@clerk/nextjs/server'
-import { UserMessages } from './db/schema'
 import { db } from './db'
-import { eq } from 'drizzle-orm'
+import { Users } from './db/schema'
 
-export async function createUserMessage(formData: FormData) {
-  const { isAuthenticated, userId } = await auth()
-  if (!isAuthenticated) throw new Error('User not found')
+export async function ensureUserExists() {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Not authenticated')
 
-  const message = formData.get('message') as string
-  await db.insert(UserMessages).values({
-    user_id: userId,
-    message,
-  })
-}
-
-export async function deleteUserMessage() {
-  const { isAuthenticated, userId } = await auth()
-  if (!isAuthenticated) throw new Error('User not found')
-
-  await db.delete(UserMessages).where(eq(UserMessages.user_id, userId))
+  await db
+    .insert(Users)
+    .values({ id: userId })
+    .onConflictDoNothing()
 }
