@@ -8,6 +8,7 @@ type HeaderProps = {
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/map", label: "Map" },
   { href: "/upload", label: "Upload" },
   { href: "/analytics", label: "Analytics" },
 ] as const;
