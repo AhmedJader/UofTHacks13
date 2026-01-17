@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -22,44 +18,8 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@api/*": [
-        "src/api/*"
-      ],
-      "@constants/*": [
-        "src/constants/*"
-      ],
-      "@context/*": [
-        "src/context/*"
-      ],
-      "@hooks/*": [
-        "src/hooks/*"
-      ],
-      "@pages/*": [
-        "src/pages/*"
-      ],
-      "@styles/*": [
-        "src/styles/*"
-      ],
-      "@atoms/*": [
-        "src/components/atoms/*"
-      ],
-      "@forms/*": [
-        "src/components/forms/*"
-      ],
-      "@molecules/*": [
-        "src/components/molecules/*"
-      ],
-      "@organisms/*": [
-        "src/components/organisms/*"
-      ],
-      "@templates/*": [
-        "src/components/templates/*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
@@ -70,7 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
