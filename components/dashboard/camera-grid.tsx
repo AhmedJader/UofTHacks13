@@ -40,7 +40,6 @@ export default function CameraGrid({
     Record<string, CameraAnalysisResponse>
   >({});
 
-  // Fake API call - replace with actual TwelveLabs API call
   const fetchCameraAnalysis = async () => {
     try {
       // TODO: Replace this with actual TwelveLabs API call
@@ -48,12 +47,11 @@ export default function CameraGrid({
       // const data = await response.json();
       // setCameraAnalysis(data);
 
-      // Fake response for now - randomly assign alert status to cameras
       const fakeResponse: Record<string, CameraAnalysisResponse> = {};
       DUMMY_CAMERAS.forEach((camera) => {
         fakeResponse[camera.id] = {
           cameraId: camera.id,
-          alert: Math.random() > 0.7, // 30% chance of alert
+          alert: Math.random() > 0.7,
         };
       });
 
@@ -78,15 +76,11 @@ export default function CameraGrid({
     }
   };
 
-  // Poll the API every 5 seconds
   useEffect(() => {
-    // Fetch immediately on mount
     fetchCameraAnalysis();
 
-    // Set up polling interval
     const interval = setInterval(fetchCameraAnalysis, 5000);
 
-    // Cleanup interval on unmount
     return () => clearInterval(interval);
   }, []);
 
