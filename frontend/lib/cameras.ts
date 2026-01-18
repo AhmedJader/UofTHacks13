@@ -4,16 +4,15 @@ export type Camera = {
   lat: number;
   lng: number;
   location: string;
-  src: string; // video file path
+  src: string;
   severity: "high" | "medium" | "low";
 };
 
-// 🔑 SINGLE SOURCE OF TRUTH
 export const CAMERAS: Camera[] = [
   {
     id: "cam-1",
     name: "Downtown",
-    location: "City Center",
+    location: "1 Dundas St E, Toronto, ON M5B 2R8",
     lat: 43.65107,
     lng: -79.347015,
     src: "/cctv/downtown.mp4",
@@ -22,7 +21,7 @@ export const CAMERAS: Camera[] = [
   {
     id: "cam-2",
     name: "Incident 1",
-    location: "Sector 4",
+    location: "Streetcar - 505 (Front Cam)",
     lat: 43.6629,
     lng: -79.3957,
     src: "/cctv/incident1.mp4",
@@ -31,7 +30,7 @@ export const CAMERAS: Camera[] = [
   {
     id: "cam-3",
     name: "Incident 2",
-    location: "Sector 7",
+    location: "Streetcar - 505 (Back Cam)",
     lat: 43.668,
     lng: -79.401,
     src: "/cctv/incident2.mp4",
@@ -40,19 +39,10 @@ export const CAMERAS: Camera[] = [
   {
     id: "cam-4",
     name: "Incident 3",
-    location: "Sector 9",
+    location: "1 Yorkdale Road, Toronto, ON M6A 3A1",
     lat: 43.645,
     lng: -79.38,
     src: "/cctv/incident3.mp4",
-    severity: "high",
-  },
-  {
-    id: "cam-5",
-    name: "TTC Station",
-    location: "Subway Platform",
-    lat: 43.656,
-    lng: -79.38,
-    src: "/cctv/ttc1.mp4",
     severity: "high",
   },
 ];
