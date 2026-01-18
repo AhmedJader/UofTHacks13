@@ -3,6 +3,6 @@ export interface Alert {
   cameraId: string;
   cameraName: string;
   message: string;
-  timestamp: Date;
+  timestamp: number; // epoch ms
   severity: "low" | "medium" | "high";
 }
