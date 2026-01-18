@@ -231,7 +231,7 @@ export default function AnalyticsDashboard() {
                         </p>
                         <p className="text-xs text-slate-400">
                           {alert.cameraName} •{" "}
-                          {alert.timestamp.toLocaleString()}
+                          {new Date(alert.timestamp).toLocaleString()}
                         </p>
                       </div>
                       <Badge
