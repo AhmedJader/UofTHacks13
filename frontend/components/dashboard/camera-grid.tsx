@@ -4,14 +4,7 @@ import { useState, useEffect } from "react";
 import { Alert } from "@/types/types";
 import { Button } from "@/components/ui/button";
 
-
-const DUMMY_CAMERAS = [
-  { id: "cam-1", name: "Downtown", location: "City Center", src: "/cctv/downtown.mp4" },
-  { id: "cam-2", name: "Incident 1", location: "Sector 4", src: "/cctv/incident1.mp4" },
-  { id: "cam-3", name: "Incident 2", location: "Sector 7", src: "/cctv/incident2.mp4" },
-  { id: "cam-4", name: "Incident 3", location: "Sector 9", src: "/cctv/incident3.mp4" },
-  { id: "cam-5", name: "TTC Station", location: "Subway Platform", src: "/cctv/ttc1.mp4" },
-];
+import { CAMERAS, Camera } from "@/lib/camera";
 
 interface CameraAnalysisResponse {
   cameraId: string;
@@ -49,7 +42,7 @@ export default function CameraGrid({
       // setCameraAnalysis(data);
 
       const fakeResponse: Record<string, CameraAnalysisResponse> = {};
-      DUMMY_CAMERAS.forEach((camera) => {
+      CAMERAS.forEach((camera) => {
         fakeResponse[camera.id] = {
           cameraId: camera.id,
           alert: Math.random() > 0.7,
@@ -63,7 +56,7 @@ export default function CameraGrid({
 
           // If the camera just detected an alert (wasn't detecting before)
           if (nowHasAlert && !previousHadAlert) {
-            const camera = DUMMY_CAMERAS.find((c) => c.id === cameraId);
+            const camera = CAMERAS.find((c) => c.id === cameraId);
             if (camera) {
               onAddAlert(camera.id, camera.name);
             }
@@ -88,7 +81,7 @@ export default function CameraGrid({
   return (
     <div className="p-4 space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        {DUMMY_CAMERAS.map((camera) => {
+        {CAMERAS.map((camera) => {
           const hasApiAlert = cameraAnalysis[camera.id]?.alert || false;
 
           console.log("Camera:", camera.id, "API Alert:", hasApiAlert);
