@@ -1,9 +1,18 @@
 "use client";
 
 import { Camera, CAMERAS } from "@/lib/cameras";
-import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, Marker, InfoWindow, TransitLayer} from "@react-google-maps/api";
 
 import { useState } from "react";
+
+// import { Polyline } from "@react-google-maps/api";
+
+// const routeCoordinates = [
+//   { lat: 43.6532, lng: -79.3832 },
+//   { lat: 43.6555, lng: -79.3721 },
+//   { lat: 43.6578, lng: -79.3612 },
+// ];
+
 
 type MapZone = {
   id: string;
@@ -39,6 +48,13 @@ const DEFAULT_CENTER = {
 //     severity: "low",
 //   },
 // ];
+
+const severityStyles = {
+  high: "bg-red-600 text-white",
+  medium: "bg-yellow-500 text-black",
+  low: "bg-green-600 text-white",
+};
+
 
 const darkMapStyle = [
   /* Base map */
@@ -78,9 +94,21 @@ const darkMapStyle = [
   { featureType: "poi.business", stylers: [{ visibility: "off" }] },
 
   /* Hide transit clutter */
-  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  // { featureType: "transit", stylers: [{ visibility: "off" }] },
 
   /* Hide admin boundaries but keep city name */
+
+  /* Highlight transit lines */
+  {
+    featureType: "transit.line",
+    elementType: "geometry",
+    stylers: [
+      { visibility: "on" },
+      { color: "#38bdf8" }, 
+      { weight: 0.5 },
+    ],
+  },
+  /* Optional: hide station clutter */
   {
     featureType: "administrative",
     elementType: "geometry",
@@ -103,6 +131,15 @@ export default function CrimeMap() {
           styles: darkMapStyle,
         }}
       >
+      <TransitLayer />
+      {/* <Polyline
+        path={routeCoordinates}
+        options={{
+          strokeColor: "#facc15",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+        }}
+      /> */}
       {CAMERAS.map((camera) => (
           <Marker
             key={camera.id}
@@ -111,6 +148,8 @@ export default function CrimeMap() {
               url:
                 camera.severity === "high"
                   ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                  : camera.severity === "medium"
+                  ? "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
                   : "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
             }}
             onClick={() => setActiveCamera(camera)}
@@ -122,21 +161,29 @@ export default function CrimeMap() {
             position={{ lat: activeCamera.lat, lng: activeCamera.lng }}
             onCloseClick={() => setActiveCamera(null)}
           >
-            <div className="w-64">
-              <h3 className="font-semibold text-sm mb-1">
-                {activeCamera.name}
-              </h3>
+            <div className="w-80"> {/* was w-64 */}
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-sm">
+                  {activeCamera.name}
+                </h3>
+
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-medium uppercase ${severityStyles[activeCamera.severity]}`}
+                >
+                  {activeCamera.severity}
+                </span>
+              </div>
+
               <p className="text-xs text-gray-500 mb-2">
                 {activeCamera.location}
               </p>
 
-              {/* SAME VIDEO AS CAMERA GRID */}
               <video
                 src={activeCamera.src}
                 autoPlay
                 controls
                 muted
-                className="w-full rounded"
+                className="w-full rounded-md"
               />
             </div>
           </InfoWindow>
