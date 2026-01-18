@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CameraGrid from "@/components/dashboard/camera-grid";
 import AlertPanel from "@/components/dashboard/alert-panel";
 import { Alert } from "@/types/types";
@@ -23,6 +23,30 @@ export default function DashboardPage() {
   const [fullscreenCameraId, setFullscreenCameraId] = useState<string | null>(
     null,
   );
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:5000/alerts");
+        const data = await res.json();
+        if (data.alerts) {
+          setAlerts((prev) => {
+            // Merge new alerts, avoiding duplicates by ID
+            const existingIds = new Set(prev.map((a) => a.id));
+            const newAlerts = data.alerts.filter((a: Alert) => !existingIds.has(a.id));
+            return [...newAlerts, ...prev];
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch analysis alerts:", error);
+      }
+    };
+
+    fetchAlerts();
+    // Poll every 10 seconds
+    const interval = setInterval(fetchAlerts, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleCameraClick = (cameraId: string) => {
     // Toggle the filter: if the same camera is clicked, clear the filter
