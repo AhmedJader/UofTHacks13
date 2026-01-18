@@ -12,9 +12,7 @@ function ClientTime({ timestamp }: { timestamp: string | number }) {
 
   useEffect(() => {
     const date =
-      typeof timestamp === "number"
-        ? new Date(timestamp)
-        : new Date(timestamp);
+      typeof timestamp === "number" ? new Date(timestamp) : new Date(timestamp);
 
     setFormatted(date.toLocaleTimeString());
   }, [timestamp]);
@@ -73,31 +71,25 @@ export default function AlertPanel({
       {/* Header */}
       <div className="p-4 border-b border-slate-700 bg-slate-800">
         <h2 className="text-lg font-semibold text-white">Active Alerts</h2>
-        <p className="text-xs text-slate-400 mt-1">
-          {alerts.length} alert(s)
-        </p>
+        <p className="text-xs text-slate-400 mt-1">{alerts.length} alert(s)</p>
       </div>
 
       {/* Selected alert */}
       {selectedAlert && (
         <div
           className={`p-4 border-b border-slate-700 ${getSeverityColor(
-            selectedAlert.severity
+            selectedAlert.severity,
           )}`}
         >
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h3 className="font-semibold">
-                {selectedAlert.cameraName}
-              </h3>
-              <p className="text-sm opacity-80 mt-1">
-                {selectedAlert.message}
-              </p>
+              <h3 className="font-semibold">{selectedAlert.cameraName}</h3>
+              <p className="text-sm opacity-80 mt-1">{selectedAlert.message}</p>
             </div>
 
             <span
               className={`px-2 py-1 rounded text-xs font-semibold ${getSeverityBadgeColor(
-                selectedAlert.severity
+                selectedAlert.severity,
               )}`}
             >
               {selectedAlert.severity.toUpperCase()}
@@ -128,7 +120,7 @@ export default function AlertPanel({
           <div className="space-y-2 p-3">
             {alerts.map((alert) => (
               <button
-                key={alert.id}
+                key={`${alert.cameraName}_${alert.id}`}
                 onClick={() => onSelectAlert(alert.id)}
                 className={`w-full text-left p-3 rounded-lg border transition-all ${
                   selectedAlertId === alert.id
@@ -137,21 +129,17 @@ export default function AlertPanel({
                 }`}
               >
                 <div className="flex items-start justify-between mb-1">
-                  <h4 className="text-sm font-semibold">
-                    {alert.cameraName}
-                  </h4>
+                  <h4 className="text-sm font-semibold">{alert.cameraName}</h4>
                   <span
                     className={`px-2 py-0.5 rounded text-xs font-semibold ${getSeverityBadgeColor(
-                      alert.severity
+                      alert.severity,
                     )}`}
                   >
                     {alert.severity[0].toUpperCase()}
                   </span>
                 </div>
 
-                <p className="text-xs opacity-70 truncate">
-                  {alert.message}
-                </p>
+                <p className="text-xs opacity-70 truncate">{alert.message}</p>
 
                 <p className="text-xs opacity-50 mt-1">
                   <ClientTime timestamp={alert.timestamp} />
