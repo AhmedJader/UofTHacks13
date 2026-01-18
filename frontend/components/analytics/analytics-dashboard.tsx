@@ -37,11 +37,15 @@ const generateMockData = (): {
     new Date(date.getTime() - d * 24 * 60 * 60 * 1000);
 
   // Generate some alerts for different time ranges
-  const messages = [
-    "Motion detected",
-    "Unidentified object",
-    "Loitering detected",
-    "Camera obstruction",
+  // Generate some alerts for different time ranges
+  const ALERT_TYPES = [
+    { message: "Person wielding knife", tag: "Weapon", severity: "high" as const },
+    { message: "Motion detected", tag: "Suspicious", severity: "medium" as const },
+    { message: "Unidentified object", tag: "Object", severity: "low" as const },
+    { message: "Loitering detected", tag: "Suspicious", severity: "low" as const },
+    { message: "Camera obstruction", tag: "System", severity: "high" as const },
+    { message: "Unauthorized access", tag: "Security", severity: "high" as const },
+    { message: "Glass breaking sound", tag: "Audio", severity: "high" as const },
   ];
 
   for (let i = 0; i < 50; i++) {
@@ -57,19 +61,21 @@ const generateMockData = (): {
       timestamp = subDays(now, Math.random() * 7); // Last week
     else timestamp = subDays(now, Math.random() * 30); // Older
 
+    const alertType = ALERT_TYPES[Math.floor(Math.random() * ALERT_TYPES.length)];
+
     alerts.push({
       id: `alert-${i}`,
       cameraId: station.id,
       cameraName: station.name,
-      message: messages[Math.floor(Math.random() * messages.length)],
-      timestamp,
-      severity:
-        Math.random() > 0.7 ? "high" : Math.random() > 0.4 ? "medium" : "low",
+      message: alertType.message,
+      timestamp: timestamp.getTime(),
+      severity: alertType.severity,
+      tag: alertType.tag,
     });
   }
 
   // Sort by newest first
-  alerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  alerts.sort((a, b) => b.timestamp - a.timestamp);
 
   return { alerts, stations };
 };
@@ -84,7 +90,7 @@ export default function AnalyticsDashboard() {
   const filteredAlerts = useMemo(() => {
     const now = new Date();
     return ALL_ALERTS.filter((alert) => {
-      const diff = now.getTime() - alert.timestamp.getTime();
+      const diff = now.getTime() - alert.timestamp;
       const hours = diff / (1000 * 60 * 60);
 
       switch (timeRange) {
@@ -227,6 +233,9 @@ export default function AnalyticsDashboard() {
                       <div className="space-y-1">
                         <p className="text-sm font-medium leading-none text-white">
                           {alert.message}
+                          <Badge variant="outline" className="ml-2 text-[10px] h-5 text-white">
+                            {alert.tag}
+                          </Badge>
                         </p>
                         <p className="text-xs text-slate-400">
                           {alert.cameraName} •{" "}
