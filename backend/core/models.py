@@ -1,4 +1,3 @@
-import os
 from pydantic import BaseModel
 from fastapi import HTTPException
 from .config import settings
@@ -11,9 +10,8 @@ class TwelveLabsModel(BaseModel):
     @classmethod
     def get_twelve_labs_client(cls):
         api_key = settings.TWELVE_LABS_API_KEY
-        index_id = settings.TWELVE_LABS_INDEX_ID
 
-        if api_key and index_id:
+        if api_key:
             client = TwelveLabs(api_key=api_key, timeout=180)
             return client
 

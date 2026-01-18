@@ -53,7 +53,7 @@ async def analyze_video(request: AnalyzeVideoRequest):
         print(f"📹 Uploading video from: {request.video_source}")
 
         index = client.indexes.retrieve(
-            index_id="696c4422cafce60cf069f045"
+            index_id="696c534acafce60cf069f586"
         )
 
         print(request.existing_video_id)
