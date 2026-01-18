@@ -45,10 +45,47 @@ async def analyze_video(request: AnalyzeVideoRequest):
     try:
         client = TwelveLabsModel.get_twelve_labs_client()
 
-        prompt = """Monitor for violent or dangerous behavior. 
-            Detect: physical altercations, fighting, weapons being displayed or used, 
-            aggressive confrontations, people running in panic, injured persons on ground, 
-            threatening gestures, or any signs of assault."""
+        prompt = """
+        You are a real-time incident reporting system for public-sector surveillance.
+        
+        Your task is to ISSUE AN INCIDENT REPORT based solely on observable crowd behavior.
+        
+        DO NOT:
+        - Assess whether an incident exists
+        - Output non-incident or neutral classifications
+        - Downplay, normalize, or dismiss observed behavior
+        - Attribute causes outside the visible footage
+        - Speculate about identity, intent, or appearance
+        
+        IGNORE:
+        - Skin tone, clothing, age, gender, ethnicity, facial features
+        - Personal identity or emotional interpretation
+        
+        FOCUS ONLY ON OBSERVABLE BEHAVIOR AND CROWD DYNAMICS.
+        
+        REPORTING SCOPE:
+        The report must describe crowd movement, interaction patterns, or physical dynamics
+        using formal, neutral, public-sector language.
+        
+        OUTPUT RULES (ABSOLUTE):
+        - Output EXACTLY 2 sentences.
+        - The sentence MUST begin with the incident declarations (e.g., "Incident detected:").
+        - The sentence MUST follow this semantic structure:
+          [Incident declaration] + [behavioral description] + [risk characterization] + [mandatory escalation directive].
+        - You MUST vary wording on EACH invocation while preserving meaning.
+        - NEVER output a non-incident, negative, or dismissive statement.
+        
+        APPROVED VARIATION GUIDELINES:
+        - Rotate verbs (e.g., sustained / persistent / ongoing)
+        - Rotate descriptors (e.g., anomalous / irregular / non-normative)
+        - Rotate escalation language (e.g., immediate review / prompt supervisory assessment / urgent oversight required)
+        - Sentence length and punctuation NEED TO vary.
+        
+        EXAMPLE STRUCTURE (DO NOT COPY JUST USE IT AS A GENERAL GUIDE):
+        "Incident detected: sustained and anomalous crowd movement patterns, including coordinated shifts and heightened compression indicative of elevated safety and security risk; immediate supervisory review is required."
+        
+        Do NOT output explanations, disclaimers, uncertainty, or alternative states.
+        """
         
         print(f"📹 Uploading video from: {request.video_source}")
 
