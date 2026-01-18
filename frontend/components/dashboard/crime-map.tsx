@@ -40,6 +40,13 @@ const DEFAULT_CENTER = {
 //   },
 // ];
 
+const severityStyles = {
+  high: "bg-red-600 text-white",
+  medium: "bg-yellow-500 text-black",
+  low: "bg-green-600 text-white",
+};
+
+
 const darkMapStyle = [
   /* Base map */
   { elementType: "geometry", stylers: [{ color: "#020617" }] }, // slate-950
@@ -111,6 +118,8 @@ export default function CrimeMap() {
               url:
                 camera.severity === "high"
                   ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                  : camera.severity === "medium"
+                  ? "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
                   : "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
             }}
             onClick={() => setActiveCamera(camera)}
@@ -122,21 +131,29 @@ export default function CrimeMap() {
             position={{ lat: activeCamera.lat, lng: activeCamera.lng }}
             onCloseClick={() => setActiveCamera(null)}
           >
-            <div className="w-64">
-              <h3 className="font-semibold text-sm mb-1">
-                {activeCamera.name}
-              </h3>
+            <div className="w-80"> {/* was w-64 */}
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-sm">
+                  {activeCamera.name}
+                </h3>
+
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-medium uppercase ${severityStyles[activeCamera.severity]}`}
+                >
+                  {activeCamera.severity}
+                </span>
+              </div>
+
               <p className="text-xs text-gray-500 mb-2">
                 {activeCamera.location}
               </p>
 
-              {/* SAME VIDEO AS CAMERA GRID */}
               <video
                 src={activeCamera.src}
                 autoPlay
                 controls
                 muted
-                className="w-full rounded"
+                className="w-full rounded-md"
               />
             </div>
           </InfoWindow>
