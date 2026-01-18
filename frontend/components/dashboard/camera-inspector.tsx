@@ -4,6 +4,7 @@ import { useEffect, useCallback, useState } from "react";
 import { CAMERAS } from "@/lib/cameras";
 import { CameraAnalysis } from "./camera-grid";
 import { Button } from "@/components/ui/button";
+import { MapPin, Video } from "lucide-react";
 
 export default function CameraInspector({
   cameraId,
@@ -61,8 +62,14 @@ export default function CameraInspector({
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
             <div>
-              <h2 className="text-sm font-semibold">{camera.name}</h2>
-              <p className="text-xs text-slate-400">{camera.location}</p>
+              <div className="flex items-center gap-2 mb-1">
+                <Video className="w-4 h-4 text-slate-400" />
+                <h2 className="text-sm font-semibold">{camera.name}</h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="w-3 h-3 text-slate-500" />
+                <p className="text-xs text-slate-400">{camera.location}</p>
+              </div>
             </div>
             <button
               onClick={onClose}
@@ -74,7 +81,13 @@ export default function CameraInspector({
           </div>
 
           {/* Video */}
-          <div className="aspect-video bg-black">
+          <div className="aspect-video bg-black relative">
+            <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/60 px-2 py-1 rounded-md backdrop-blur-sm border border-white/10">
+              <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.6)]" />
+              <span className="text-[10px] font-bold text-red-500 tracking-widest">
+                LIVE
+              </span>
+            </div>
             <video
               src={camera.src}
               autoPlay
@@ -105,11 +118,10 @@ export default function CameraInspector({
               cameraAnalyses.map((a, i) => (
                 <div
                   key={i}
-                  className={`rounded-lg p-3 text-sm border ${
-                    a.flagged
-                      ? "border-red-600 bg-red-950/40"
-                      : "border-slate-700 bg-slate-900"
-                  }`}
+                  className={`rounded-lg p-3 text-sm border ${a.flagged
+                    ? "border-red-600 bg-red-950/40"
+                    : "border-slate-700 bg-slate-900"
+                    }`}
                 >
                   <div className="text-xs text-slate-400 mb-1">
                     {new Date(a.timestamp).toLocaleTimeString()}
