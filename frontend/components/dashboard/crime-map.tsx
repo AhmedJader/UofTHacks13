@@ -1,9 +1,18 @@
 "use client";
 
 import { Camera, CAMERAS } from "@/lib/cameras";
-import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, Marker, InfoWindow, TransitLayer} from "@react-google-maps/api";
 
 import { useState } from "react";
+
+// import { Polyline } from "@react-google-maps/api";
+
+// const routeCoordinates = [
+//   { lat: 43.6532, lng: -79.3832 },
+//   { lat: 43.6555, lng: -79.3721 },
+//   { lat: 43.6578, lng: -79.3612 },
+// ];
+
 
 type MapZone = {
   id: string;
@@ -85,9 +94,21 @@ const darkMapStyle = [
   { featureType: "poi.business", stylers: [{ visibility: "off" }] },
 
   /* Hide transit clutter */
-  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  // { featureType: "transit", stylers: [{ visibility: "off" }] },
 
   /* Hide admin boundaries but keep city name */
+
+  /* Highlight transit lines */
+  {
+    featureType: "transit.line",
+    elementType: "geometry",
+    stylers: [
+      { visibility: "on" },
+      { color: "#38bdf8" }, 
+      { weight: 0.5 },
+    ],
+  },
+  /* Optional: hide station clutter */
   {
     featureType: "administrative",
     elementType: "geometry",
@@ -110,6 +131,15 @@ export default function CrimeMap() {
           styles: darkMapStyle,
         }}
       >
+      <TransitLayer />
+      {/* <Polyline
+        path={routeCoordinates}
+        options={{
+          strokeColor: "#facc15",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+        }}
+      /> */}
       {CAMERAS.map((camera) => (
           <Marker
             key={camera.id}
