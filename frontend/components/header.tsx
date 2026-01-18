@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 
 export const Header = ({ user }: HeaderProps) => {
   return (
-    <header className="flex justify-end items-center p-4 h-16 border-b">
+    <header className="sticky top-0 z-50 flex items-center p-4 h-16 border-b border-slate-700/60 backdrop-blur supports-[backdrop-filter]:bg-slate-900 text-white">
       <div className="flex items-center gap-1 px-4 w-full justify-between">
         <div>
           {NAV_ITEMS.map((item) => {
