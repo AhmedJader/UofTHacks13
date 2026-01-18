@@ -24,7 +24,7 @@ export async function insertAssetIntoDbIfNotExists(
       cameraSrc: camera_src,
       videoId: video_id,
     })
-    .onConflictDoNothing();
+    .onConflictDoNothing({ target: assets.cameraSrc });
 }
 
 export async function getAssetIfExists(camera_src: string) {
