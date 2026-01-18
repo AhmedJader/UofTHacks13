@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { Alert } from "@/types/types";
 import { Button } from "@/components/ui/button";
+import { CAMERAS } from "@/lib/cameras";
 
-import { CAMERAS, Camera } from "@/lib/camera";
 
 interface CameraAnalysisResponse {
   cameraId: string;
