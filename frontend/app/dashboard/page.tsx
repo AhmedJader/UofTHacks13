@@ -26,7 +26,6 @@ export default function DashboardPage() {
     if (!camera) return;
 
     try {
-      // ✅ reuse existing asset if present
       const asset = await getAssetIfExists(camera.src);
 
       const res = await fetch("http://127.0.0.1:8000/api/analyze/video", {
@@ -40,19 +39,11 @@ export default function DashboardPage() {
         }),
       });
 
-      if (!res.ok) {
-        console.error("Analyze failed:", await res.text());
-        return;
-      }
+      if (!res.ok) return;
 
       const data: AnalyzeVideoResponse = await res.json();
+      if (data.status !== "success" || !data.analysis_text) return;
 
-      if (data.status !== "success" || !data.analysis_text) {
-        console.error("Analysis error:", data.error);
-        return;
-      }
-
-      // ✅ persist asset if newly created
       if (data.video_id && !asset) {
         await insertAssetIntoDbIfNotExists(camera.src, data.video_id);
       }
@@ -69,34 +60,32 @@ export default function DashboardPage() {
         ...prev,
       ]);
     } catch (err) {
-      console.error("Analyze feed failed:", err);
+      console.error(err);
     }
   };
 
   return (
-    <main className="h-screen bg-linear-to-b from-slate-950 to-black text-white flex overflow-hidden font-mono">
-      {/* Sidebar */}
+    <main className="h-screen bg-black text-white flex overflow-hidden font-mono">
       <CameraSidebar
         activeCameraId={activeCameraId}
         onSelectCamera={setActiveCameraId}
       />
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur shrink-0">
+        <header className="shrink-0 bg-black border-b border-neutral-800">
           <div className="px-6 py-4 flex items-center justify-between">
             <h1 className="text-lg font-semibold tracking-tight">
               Live Surveillance Dashboard
             </h1>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-neutral-500">
               {new Date().toLocaleDateString()}
             </span>
           </div>
         </header>
 
-        {/* View Area */}
-        <div className="flex-1 overflow-hidden relative">
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
           {activeCameraId ? (
             <CameraSpotlight
               cameraId={activeCameraId}
