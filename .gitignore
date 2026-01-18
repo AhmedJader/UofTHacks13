@@ -44,7 +44,7 @@ next-env.d.ts
 .clerk/
 
 # python
-venv/
+*.env
 __pycache__/
-*.pyc
-backend/data.json
+backend/**/__pycache__/
+/backend/.venv
