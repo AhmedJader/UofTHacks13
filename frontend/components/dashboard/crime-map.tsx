@@ -1,26 +1,17 @@
 "use client";
 
+import { useState, useRef } from "react";
+import {
+  GoogleMap,
+  LoadScript,
+  InfoWindow,
+  TransitLayer,
+  OverlayView,
+} from "@react-google-maps/api";
+
 import { Camera, CAMERAS } from "@/lib/cameras";
-import { GoogleMap, LoadScript, Marker, InfoWindow, TransitLayer} from "@react-google-maps/api";
 
-import { useState } from "react";
-
-// import { Polyline } from "@react-google-maps/api";
-
-// const routeCoordinates = [
-//   { lat: 43.6532, lng: -79.3832 },
-//   { lat: 43.6555, lng: -79.3721 },
-//   { lat: 43.6578, lng: -79.3612 },
-// ];
-
-
-type MapZone = {
-  id: string;
-  lat: number;
-  lng: number;
-  label: string;
-  severity: "high" | "medium" | "low";
-};
+type Severity = "high" | "medium" | "low";
 
 const containerStyle = {
   width: "100%",
@@ -32,49 +23,31 @@ const DEFAULT_CENTER = {
   lng: -79.3832,
 };
 
-// const MOCK_ZONES: MapZone[] = [
-//   {
-//     id: "A",
-//     lat: 43.65107,
-//     lng: -79.347015,
-//     label: "Zone A - Alert",
-//     severity: "high",
-//   },
-//   {
-//     id: "B",
-//     lat: 43.6629,
-//     lng: -79.3957,
-//     label: "Zone B - Active",
-//     severity: "low",
-//   },
-// ];
-
-const severityStyles = {
+const severityStyles: Record<Severity, string> = {
   high: "bg-red-600 text-white",
   medium: "bg-yellow-500 text-black",
   low: "bg-green-600 text-white",
 };
 
+const severityDot: Record<Severity, string> = {
+  high: "bg-red-500",
+  medium: "bg-yellow-400",
+  low: "bg-green-500",
+};
 
+/**
+ * ✅ RESTORED + MERGED DARK STYLE
+ * Transit + roads + labels all visible
+ */
 const darkMapStyle = [
-  /* Base map */
-  { elementType: "geometry", stylers: [{ color: "#020617" }] }, // slate-950
+  { elementType: "geometry", stylers: [{ color: "#020617" }] },
+  { elementType: "labels.text.fill", stylers: [{ color: "#9ca3af" }] },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#020617" }] },
 
-  /* Text colors (keep labels readable) */
-  {
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#9ca3af" }], // slate-400
-  },
-  {
-    elementType: "labels.text.stroke",
-    stylers: [{ color: "#020617" }], // blend into bg
-  },
-
-  /* Roads */
   {
     featureType: "road",
     elementType: "geometry",
-    stylers: [{ color: "#1e293b" }], // slate-800
+    stylers: [{ color: "#1e293b" }],
   },
   {
     featureType: "road",
@@ -82,33 +55,21 @@ const darkMapStyle = [
     stylers: [{ color: "#9ca3af" }],
   },
 
-  /* Water */
   {
     featureType: "water",
     elementType: "geometry",
     stylers: [{ color: "#020617" }],
   },
 
-  /* Hide POIs completely */
   { featureType: "poi", stylers: [{ visibility: "off" }] },
   { featureType: "poi.business", stylers: [{ visibility: "off" }] },
 
-  /* Hide transit clutter */
-  // { featureType: "transit", stylers: [{ visibility: "off" }] },
-
-  /* Hide admin boundaries but keep city name */
-
-  /* Highlight transit lines */
   {
     featureType: "transit.line",
     elementType: "geometry",
-    stylers: [
-      { visibility: "on" },
-      { color: "#38bdf8" }, 
-      { weight: 0.5 },
-    ],
+    stylers: [{ color: "#38bdf8" }, { weight: 0.5 }],
   },
-  /* Optional: hide station clutter */
+
   {
     featureType: "administrative",
     elementType: "geometry",
@@ -116,53 +77,143 @@ const darkMapStyle = [
   },
 ];
 
+/**
+ * Absolute pan with vertical offset (NO cumulative drift)
+ */
+function panToWithOffset(
+  map: google.maps.Map,
+  latLng: google.maps.LatLngLiteral,
+  offsetY: number
+) {
+  const projection = map.getProjection();
+  if (!projection) return;
+
+  const point = projection.fromLatLngToPoint(
+    new google.maps.LatLng(latLng.lat, latLng.lng)
+  );
+  if (!point) return;
+
+  const zoom = map.getZoom();
+  if (zoom == null) return;
+
+  const scale = Math.pow(2, zoom);
+
+  const worldPoint = new google.maps.Point(
+    point.x,
+    point.y - offsetY / scale
+  );
+
+  const newCenter = projection.fromPointToLatLng(worldPoint);
+  if (!newCenter) return;
+
+  map.panTo(newCenter);
+}
+
+function IncidentMarker({
+  camera,
+  active,
+  onClick,
+}: {
+  camera: Camera;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <OverlayView
+      position={{ lat: camera.lat, lng: camera.lng }}
+      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      getPixelPositionOffset={() => ({ x: 0, y: 0 })}
+    >
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        className="
+          relative -translate-x-1/2 -translate-y-1/2
+          w-14 h-14 flex items-center justify-center
+          cursor-pointer select-none
+        "
+      >
+        {/* Pulsing glow */}
+        <span
+          className={`
+            absolute w-9 h-9 rounded-full
+            ${severityDot[camera.severity]}
+            opacity-70 animate-pulse
+          `}
+        />
+
+        {/* Core dot */}
+        <span
+          className={`
+            relative w-6 h-6 rounded-full
+            ${severityDot[camera.severity]}
+            border border-black/40
+            transition-transform duration-200
+            ${active ? "scale-125" : "scale-100"}
+          `}
+        />
+      </div>
+    </OverlayView>
+  );
+}
 
 export default function CrimeMap() {
   const [activeCamera, setActiveCamera] = useState<Camera | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+
   return (
     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={DEFAULT_CENTER}
         zoom={13}
+        onLoad={(map) => {
+          mapRef.current = map;
+        }}
         options={{
           disableDefaultUI: true,
           zoomControl: true,
           styles: darkMapStyle,
         }}
       >
-      <TransitLayer />
-      {/* <Polyline
-        path={routeCoordinates}
-        options={{
-          strokeColor: "#facc15",
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-        }}
-      /> */}
-      {CAMERAS.map((camera) => (
-          <Marker
+        <TransitLayer />
+
+        {CAMERAS.map((camera) => (
+          <IncidentMarker
             key={camera.id}
-            position={{ lat: camera.lat, lng: camera.lng }}
-            icon={{
-              url:
-                camera.severity === "high"
-                  ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-                  : camera.severity === "medium"
-                  ? "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
-                  : "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+            camera={camera}
+            active={activeCamera?.id === camera.id}
+            onClick={() => {
+              if (activeCamera?.id === camera.id) return;
+
+              setActiveCamera(camera);
+
+              if (!mapRef.current) return;
+
+              requestAnimationFrame(() => {
+                panToWithOffset(
+                  mapRef.current!,
+                  { lat: camera.lat, lng: camera.lng },
+                  240
+                );
+              });
             }}
-            onClick={() => setActiveCamera(camera)}
           />
         ))}
 
         {activeCamera && (
           <InfoWindow
-            position={{ lat: activeCamera.lat, lng: activeCamera.lng }}
+            position={{
+              lat: activeCamera.lat,
+              lng: activeCamera.lng,
+            }}
             onCloseClick={() => setActiveCamera(null)}
+            options={{ disableAutoPan: true }}
           >
-            <div className="w-80"> {/* was w-64 */}
-              <div className="flex items-center justify-between mb-2">
+            <div className="w-[420px] space-y-3">
+              <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-sm">
                   {activeCamera.name}
                 </h3>
@@ -174,17 +225,23 @@ export default function CrimeMap() {
                 </span>
               </div>
 
-              <p className="text-xs text-gray-500 mb-2">
+              <p className="text-xs text-gray-500">
                 {activeCamera.location}
               </p>
 
               <video
+                key={activeCamera.id}
                 src={activeCamera.src}
                 autoPlay
                 controls
                 muted
+                playsInline
                 className="w-full rounded-md"
               />
+
+              <div className="rounded-md bg-slate-900 border border-slate-700 p-2 text-xs text-slate-300">
+                AI analysis will appear here.
+              </div>
             </div>
           </InfoWindow>
         )}
