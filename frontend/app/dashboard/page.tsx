@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import CameraGrid, { CameraAnalysis } from "@/components/dashboard/camera-grid";
-import CameraInspector from "@/components/dashboard/camera-inspector";
+import CameraSidebar from "@/components/dashboard/camera-sidebar";
+import CameraSpotlight from "@/components/dashboard/camera-spotlight";
 import { CAMERAS } from "@/lib/cameras";
 import {
   getAssetIfExists,
@@ -73,35 +74,46 @@ export default function DashboardPage() {
   };
 
   return (
-    <main className="min-h-screen bg-linear-to-b from-slate-950 to-black text-white">
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-semibold tracking-tight">
-            Live Surveillance Dashboard
-          </h1>
-          <span className="text-xs text-slate-400">
-            {new Date().toLocaleDateString()}
-          </span>
-        </div>
-      </header>
-
-      {/* Grid */}
-      <div className="p-6">
-        <CameraGrid
-          analyses={analyses}
-          activeCameraId={activeCameraId}
-          onSelectCamera={setActiveCameraId}
-        />
-      </div>
-
-      {/* Inspector */}
-      <CameraInspector
-        cameraId={activeCameraId}
-        analyses={analyses}
-        onAnalyze={handleAnalyzeCamera}
-        onClose={() => setActiveCameraId(null)}
+    <main className="h-screen bg-linear-to-b from-slate-950 to-black text-white flex overflow-hidden font-mono">
+      {/* Sidebar */}
+      <CameraSidebar
+        activeCameraId={activeCameraId}
+        onSelectCamera={setActiveCameraId}
       />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur shrink-0">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <h1 className="text-lg font-semibold tracking-tight">
+              Live Surveillance Dashboard
+            </h1>
+            <span className="text-xs text-slate-400">
+              {new Date().toLocaleDateString()}
+            </span>
+          </div>
+        </header>
+
+        {/* View Area */}
+        <div className="flex-1 overflow-hidden relative">
+          {activeCameraId ? (
+            <CameraSpotlight
+              cameraId={activeCameraId}
+              analyses={analyses}
+              onAnalyze={handleAnalyzeCamera}
+            />
+          ) : (
+            <div className="h-full overflow-y-auto p-6">
+              <CameraGrid
+                analyses={analyses}
+                activeCameraId={null}
+                onSelectCamera={setActiveCameraId}
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
