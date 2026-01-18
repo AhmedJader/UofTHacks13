@@ -5,4 +5,5 @@ export interface Alert {
   message: string;
   timestamp: number; // epoch milliseconds ONLY
   severity: "low" | "medium" | "high";
+  tag: string;
 }
