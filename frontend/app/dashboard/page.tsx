@@ -4,7 +4,7 @@ import { useState } from "react";
 import CameraGrid, { CameraAnalysis } from "@/components/dashboard/camera-grid";
 import CameraSidebar from "@/components/dashboard/camera-sidebar";
 import CameraSpotlight from "@/components/dashboard/camera-spotlight";
-import { CAMERAS } from "@/lib/cameras";
+import { DASHBOARD_CAMERAS as CAMERAS } from "@/lib/cameras";
 import {
   getAssetIfExists,
   insertAssetIntoDbIfNotExists,
@@ -42,7 +42,10 @@ export default function DashboardPage() {
       if (!res.ok) return;
 
       const data: AnalyzeVideoResponse = await res.json();
-      if (data.status !== "success" || !data.analysis_text) return;
+      if (data.status !== "success") return;
+
+      const analysisText = data.analysis_text ?? "";
+      if (!analysisText) return;
 
       if (data.video_id && !asset) {
         await insertAssetIntoDbIfNotExists(camera.src, data.video_id);
@@ -51,10 +54,10 @@ export default function DashboardPage() {
       setAnalyses((prev) => [
         {
           cameraId,
-          analysis: data.analysis_text!,
+          analysis: analysisText,
           timestamp: Date.now(),
           flagged: /violence|weapon|fight|assault|panic|threat/i.test(
-            data.analysis_text!
+            analysisText
           ),
         },
         ...prev,
@@ -64,15 +67,19 @@ export default function DashboardPage() {
     }
   };
 
+
   return (
     <main className="h-screen bg-black text-white flex overflow-hidden font-mono">
+      {/* SIDEBAR */}
       <CameraSidebar
+        cameras={CAMERAS}
         activeCameraId={activeCameraId}
         onSelectCamera={setActiveCameraId}
       />
 
+      {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
+        {/* HEADER */}
         <header className="shrink-0 bg-black border-b border-neutral-800">
           <div className="px-6 py-4 flex items-center justify-between">
             <h1 className="text-lg font-semibold tracking-tight">
@@ -84,10 +91,11 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Content */}
+        {/* BODY */}
         <div className="flex-1 overflow-hidden">
           {activeCameraId ? (
             <CameraSpotlight
+              cameras={CAMERAS}
               cameraId={activeCameraId}
               analyses={analyses}
               onAnalyze={handleAnalyzeCamera}
@@ -95,6 +103,7 @@ export default function DashboardPage() {
           ) : (
             <div className="h-full overflow-y-auto p-6">
               <CameraGrid
+                cameras={CAMERAS}
                 analyses={analyses}
                 activeCameraId={null}
                 onSelectCamera={setActiveCameraId}

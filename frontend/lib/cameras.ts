@@ -1,3 +1,5 @@
+// lib/cameras.ts
+
 export type Camera = {
   id: string;
   name: string;
@@ -6,10 +8,14 @@ export type Camera = {
   location: string;
   src: string;
   severity: "high" | "medium" | "low";
+
+  /** Whether this camera has a real, analyzable video feed */
+  hasFeed: boolean;
 };
 
 export const CAMERAS: Camera[] = [
-  // ===== ORIGINAL CORE =====
+  // ===== REAL / ANALYZABLE CAMERAS =====
+
   {
     id: "cam-1",
     name: "Downtown — Yonge-Dundas",
@@ -18,6 +24,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.380280,
     src: "/cctv/downtown.mp4",
     severity: "high",
+    hasFeed: true,
   },
   {
     id: "cam-2",
@@ -27,6 +34,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.3957,
     src: "/cctv/incident1.mp4",
     severity: "low",
+    hasFeed: true,
   },
   {
     id: "cam-3",
@@ -36,6 +44,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.401,
     src: "/cctv/incident2.mp4",
     severity: "medium",
+    hasFeed: true,
   },
   {
     id: "cam-4",
@@ -45,6 +54,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.442665,
     src: "/cctv/incident3.mp4",
     severity: "high",
+    hasFeed: true,
   },
   {
     id: "cam-5",
@@ -54,6 +64,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.3816,
     src: "/cctv/downtown2.mp4",
     severity: "medium",
+    hasFeed: true,
   },
   {
     id: "cam-6",
@@ -63,6 +74,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.385,
     src: "/cctv/downtown3.mp4",
     severity: "low",
+    hasFeed: true,
   },
   {
     id: "cam-7",
@@ -72,9 +84,10 @@ export const CAMERAS: Camera[] = [
     lng: -79.39,
     src: "/cctv/downtown4.mp4",
     severity: "high",
+    hasFeed: true,
   },
 
-  // ===== SPACED-OUT FAKE INSTANCES =====
+  // ===== MAP-ONLY / FAKE CAMERAS =====
 
   {
     id: "cam-8",
@@ -84,6 +97,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.2633,
     src: "/cctv/fake1.mp4",
     severity: "medium",
+    hasFeed: false,
   },
   {
     id: "cam-9",
@@ -93,6 +107,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.5642,
     src: "/cctv/fake2.mp4",
     severity: "low",
+    hasFeed: false,
   },
   {
     id: "cam-10",
@@ -102,6 +117,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.4111,
     src: "/cctv/fake3.mp4",
     severity: "medium",
+    hasFeed: false,
   },
   {
     id: "cam-11",
@@ -111,6 +127,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.3176,
     src: "/cctv/fake4.mp4",
     severity: "low",
+    hasFeed: false,
   },
   {
     id: "cam-12",
@@ -120,6 +137,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.4636,
     src: "/cctv/fake5.mp4",
     severity: "medium",
+    hasFeed: false,
   },
   {
     id: "cam-13",
@@ -129,6 +147,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.3406,
     src: "/cctv/fake6.mp4",
     severity: "high",
+    hasFeed: false,
   },
   {
     id: "cam-14",
@@ -138,6 +157,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.3568,
     src: "/cctv/fake7.mp4",
     severity: "low",
+    hasFeed: false,
   },
   {
     id: "cam-15",
@@ -147,6 +167,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.5172,
     src: "/cctv/fake8.mp4",
     severity: "medium",
+    hasFeed: false,
   },
   {
     id: "cam-16",
@@ -156,6 +177,7 @@ export const CAMERAS: Camera[] = [
     lng: -79.1316,
     src: "/cctv/fake9.mp4",
     severity: "low",
+    hasFeed: false,
   },
   {
     id: "cam-17",
@@ -165,5 +187,14 @@ export const CAMERAS: Camera[] = [
     lng: -79.4172,
     src: "/cctv/fake10.mp4",
     severity: "high",
+    hasFeed: false,
   },
 ];
+
+// ===== DOMAIN-SPECIFIC EXPORTS =====
+
+// Dashboard MUST ONLY see real feeds
+export const DASHBOARD_CAMERAS = CAMERAS.filter(c => c.hasFeed);
+
+// Map can show everything
+export const MAP_CAMERAS = CAMERAS;

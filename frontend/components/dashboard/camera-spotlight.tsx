@@ -1,19 +1,21 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { CAMERAS } from "@/lib/cameras";
-import { CameraAnalysis } from "./camera-grid";
+import type { Camera } from "@/lib/cameras";
+import type { CameraAnalysis } from "./camera-grid";
 import { Button } from "@/components/ui/button";
 import { MapPin, Video, AlertTriangle } from "lucide-react";
 import PoseOverlayMulti from "../PoseOverlayMulti";
 
 interface CameraSpotlightProps {
+  cameras: Camera[];
   cameraId: string;
   analyses: CameraAnalysis[];
   onAnalyze: (cameraId: string) => Promise<void>;
 }
 
 export default function CameraSpotlight({
+  cameras,
   cameraId,
   analyses,
   onAnalyze,
@@ -21,8 +23,9 @@ export default function CameraSpotlight({
   const [loading, setLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const camera = CAMERAS.find((c) => c.id === cameraId);
+  const camera = cameras.find((c) => c.id === cameraId);
   const cameraAnalyses = analyses.filter((a) => a.cameraId === cameraId);
+
   if (!camera) return null;
 
   const runAnalysis = async () => {

@@ -1,7 +1,7 @@
 "use client";
 
-import { CAMERAS } from "@/lib/cameras";
 import { MapPin, Video } from "lucide-react";
+import type { Camera } from "@/lib/cameras";
 
 export type CameraAnalysis = {
   cameraId: string;
@@ -11,19 +11,21 @@ export type CameraAnalysis = {
 };
 
 interface CameraGridProps {
+  cameras: Camera[];
   analyses: CameraAnalysis[];
   activeCameraId: string | null;
   onSelectCamera: (cameraId: string) => void;
 }
 
 export default function CameraGrid({
+  cameras,
   analyses,
   activeCameraId,
   onSelectCamera,
 }: CameraGridProps) {
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {CAMERAS.map((camera) => {
+      {cameras.map((camera) => {
         const latest = analyses
           .filter((a) => a.cameraId === camera.id)
           .sort((a, b) => b.timestamp - a.timestamp)[0];
@@ -37,8 +39,7 @@ export default function CameraGrid({
                 activeCameraId === camera.id
                   ? "border-red-600 ring-1 ring-red-600/40"
                   : "border-neutral-800 hover:border-neutral-600"
-              }
-            `}
+              }`}
           >
             <div className="aspect-video bg-black relative">
               <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-black/70 px-2 py-1 rounded-md border border-red-900/60">
@@ -67,7 +68,9 @@ export default function CameraGrid({
 
               <div className="flex items-center gap-2">
                 <MapPin className="w-3 h-3 text-neutral-500" />
-                <p className="text-xs text-neutral-400">{camera.location}</p>
+                <p className="text-xs text-neutral-400">
+                  {camera.location}
+                </p>
               </div>
 
               {latest?.flagged && (

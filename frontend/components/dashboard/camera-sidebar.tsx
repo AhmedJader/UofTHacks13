@@ -1,14 +1,16 @@
 "use client";
 
-import { CAMERAS } from "@/lib/cameras";
 import { Folder, Video, LayoutGrid } from "lucide-react";
+import type { Camera } from "@/lib/cameras";
 
 interface CameraSidebarProps {
+  cameras: Camera[];
   activeCameraId: string | null;
   onSelectCamera: (cameraId: string | null) => void;
 }
 
 export default function CameraSidebar({
+  cameras,
   activeCameraId,
   onSelectCamera,
 }: CameraSidebarProps) {
@@ -26,8 +28,7 @@ export default function CameraSidebar({
               activeCameraId === null
                 ? "bg-neutral-900 text-white border-l-2 border-red-600"
                 : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
-            }
-          `}
+            }`}
         >
           <LayoutGrid className="w-4 h-4" />
           View All Feeds
@@ -41,7 +42,7 @@ export default function CameraSidebar({
         </div>
 
         <div className="space-y-1">
-          {CAMERAS.map((camera) => (
+          {cameras.map((camera) => (
             <button
               key={camera.id}
               onClick={() => onSelectCamera(camera.id)}
@@ -50,8 +51,7 @@ export default function CameraSidebar({
                   activeCameraId === camera.id
                     ? "bg-neutral-900 text-white border-l-2 border-red-600"
                     : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
-                }
-              `}
+                }`}
             >
               <Video className="w-3 h-3 shrink-0" />
               <span className="truncate">{camera.name}</span>

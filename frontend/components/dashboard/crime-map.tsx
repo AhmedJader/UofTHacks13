@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   GoogleMap,
   LoadScript,
@@ -122,7 +122,6 @@ function IncidentMarker({
     <OverlayView
       position={{ lat: camera.lat, lng: camera.lng }}
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-      getPixelPositionOffset={() => ({ x: 0, y: 0 })}
     >
       <div
         onClick={(e) => {
@@ -135,7 +134,6 @@ function IncidentMarker({
           cursor-pointer select-none
         "
       >
-        {/* Pulsing glow */}
         <span
           className={`
             absolute w-9 h-9 rounded-full
@@ -144,7 +142,6 @@ function IncidentMarker({
           `}
         />
 
-        {/* Core dot */}
         <span
           className={`
             relative w-6 h-6 rounded-full
@@ -161,7 +158,32 @@ function IncidentMarker({
 
 export default function CrimeMap() {
   const [activeCamera, setActiveCamera] = useState<Camera | null>(null);
+
+  // 🔥 AI analysis state
+  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+
   const mapRef = useRef<google.maps.Map | null>(null);
+
+  // 🔥 Fetch Gemini analysis when camera changes
+  useEffect(() => {
+    if (!activeCamera) return;
+
+    setLoadingAnalysis(true);
+    setAnalysis(null);
+
+    fetch(`/api/analyze-video?src=${activeCamera.src}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setAnalysis(data.analysis);
+      })
+      .catch(() => {
+        setAnalysis("Analysis failed.");
+      })
+      .finally(() => {
+        setLoadingAnalysis(false);
+      });
+  }, [activeCamera]);
 
   return (
     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
@@ -239,9 +261,19 @@ export default function CrimeMap() {
                 className="w-full rounded-md"
               />
 
-              <div className="rounded-md bg-slate-900 border border-slate-700 p-2 text-xs text-slate-300">
-                AI analysis will appear here.
+              <div className="rounded-md bg-slate-900 border border-slate-700 p-2 text-xs text-slate-300 space-y-1 min-h-[80px]">
+                {loadingAnalysis && (
+                  <span className="text-slate-400">Analyzing footage…</span>
+                )}
+
+                {!loadingAnalysis &&
+                  analysis?.split("\n").map((line, i) => (
+                    <div key={i} className="leading-snug">
+                      {line}
+                    </div>
+                  ))}
               </div>
+
             </div>
           </InfoWindow>
         )}
